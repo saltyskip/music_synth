@@ -1,0 +1,37 @@
+import sys
+import math
+
+decay_constant = 1
+def getExpValue(duration):
+	return math.e**(-decay_constant * (duration / 48.0))
+
+
+orig_stdout = sys.stdout
+f = open('exponential_rom.v', 'w')
+sys.stdout = f
+
+print "module exponential_rom("
+print "		input clk,"
+print "		input [6:0] duration,"
+print "		output reg [9:0] dout"
+print "	);"
+
+print "	wire [9:0] memory [127:0];"
+print "	always @(posedge clk)"
+print "		dout = memory[addr];"
+
+for i in xrange(0,5):
+	value = 384 + i*128
+	string = "assign memory ["+ `i`
+	string +=  "] = {10\'d%010d};" %(value)
+	print string 
+
+for i in xrange(5,128):
+	value = getExpValue(i-5)
+	string = "assign memory["+`i`
+	string +=  "] = {10\'d%010d};" %(value*1023)
+	print string 
+print "endmodule"
+
+sys.stdout = orig_stdout
+f.close()
